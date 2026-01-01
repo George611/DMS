@@ -165,9 +165,6 @@ export const translations = {
         beds: "Beds",
         icu: "ICU",
         units: "Units",
-        available: "Available",
-        deployed: "Deployed",
-        active: "Active",
         full: "Full",
 
         // Logistics Data
@@ -350,9 +347,6 @@ export const translations = {
         beds: "Camas",
         icu: "UCI",
         units: "Unidades",
-        available: "Disponible",
-        deployed: "Desplegado",
-        active: "Activo",
         full: "Lleno",
 
         // Logistics Data
@@ -535,9 +529,6 @@ export const translations = {
         beds: "Lits",
         icu: "Soins Intensifs",
         units: "Unités",
-        available: "Disponible",
-        deployed: "Déployé",
-        active: "Actif",
         full: "Complet",
 
         // Logistics Data
@@ -721,9 +712,6 @@ export const translations = {
         beds: "الأسرة",
         icu: "العناية المركزة",
         units: "وحدات",
-        available: "متاح",
-        deployed: "منشر",
-        active: "نشط",
         full: "ممتلئ",
 
         // Logistics Data
