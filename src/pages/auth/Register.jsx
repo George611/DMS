@@ -34,20 +34,37 @@ const Register = () => {
     terms: false
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
-    // In a real app, this would register the user and trigger an email.
-    // For now, redirect to email verification
-    register(formData);
-    navigate('/verify-email');
+
+    setIsSubmitting(true);
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: 'citizen' // Default role for new signups
+      });
+      navigate('/dashboard'); // Direct to dashboard on success
+    } catch (err) {
+      setError(err || "An error occurred during registration");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   const handleSocialLogin = (provider) => {
     // Redirect to mock provider
@@ -61,7 +78,11 @@ const Register = () => {
         {/* Left Side - Visual */}
         <div className="register-visual">
           <div className="visual-content">
+            <Link to="/app/dashboard" className="visual-logo-link animate-slide-up-fade">
+              <img src="/logo.png" alt="DMS Logo" className="visual-logo" />
+            </Link>
             <h1>{t('joinDms')}</h1>
+
             <p className="subtitle">{t('bePartNetwork')}</p>
           </div>
 
@@ -87,7 +108,9 @@ const Register = () => {
             <div className="form-header">
               <h2>{t('createAccount')}</h2>
               <p>{t('takesAMinute')}</p>
+              {error && <div className="error-message animate-fade-in">{error}</div>}
             </div>
+
 
             <form onSubmit={handleSubmit} className="register-form">
 
@@ -159,9 +182,10 @@ const Register = () => {
                 </label>
               </div>
 
-              <button type="submit" className="btn-submit">
-                {t('signUp')}
+              <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Creating Account...' : t('signUp')}
               </button>
+
             </form>
 
             <div className="divider">
@@ -247,6 +271,18 @@ const Register = () => {
           font-weight: 700;
         }
 
+        .visual-logo-link {
+          display: inline-block;
+          margin-bottom: 2rem;
+        }
+        .visual-logo {
+          height: 60px;
+          width: auto;
+          filter: brightness(0) invert(1);
+          object-fit: contain;
+        }
+
+
         .subtitle {
           color: rgba(255, 255, 255, 0.9);
           font-size: 1.1rem;
@@ -323,8 +359,25 @@ const Register = () => {
         }
         .form-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
         .form-header p { color: var(--text-secondary); }
+        
+        .error-message {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid var(--danger);
+          color: var(--danger);
+          border-radius: var(--radius-md);
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
 
         .register-form {
+
           display: flex;
           flex-direction: column;
           gap: 1.25rem;

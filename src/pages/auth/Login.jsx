@@ -14,6 +14,9 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   // Role state, initialized from location state or default
   const [role, setRole] = useState(location.state?.role || 'citizen');
@@ -42,12 +45,22 @@ const Login = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate login logic with role
-    login(email, password, role);
-    navigate('/2fa'); // Go to role selection after login
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      await login(email, password);
+      // Login context already handles user state, navigate to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err || "Invalid email or password");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   const handleSocialLogin = (provider) => {
     // Redirect to mock provider
@@ -61,7 +74,11 @@ const Login = () => {
         {/* Left Side - Visual */}
         <div key={role} className="login-visual animate-fade-in" style={{ backgroundColor: currentConfig.color }}>
           <div className="visual-content">
+            <Link to="/app/dashboard" className="visual-logo-link animate-slide-up-fade">
+              <img src="/logo.png" alt="DMS Logo" className="visual-logo" />
+            </Link>
             <h1 className="animate-slide-up-fade">{currentConfig.label} {t('access')}</h1>
+
             <p className="subtitle animate-slide-up-fade" style={{ animationDelay: '0.1s' }}>
               <FaCheck className="inline mr-2 text-white/80" /> {t('signIn')} as {currentConfig.label}.
             </p>
@@ -104,7 +121,9 @@ const Login = () => {
             <div className="form-header">
               <h2>{t('signIn')}</h2>
               <p>{t('enterDetails')}</p>
+              {error && <div className="error-message animate-fade-in">{error}</div>}
             </div>
+
 
             <form onSubmit={handleSubmit} className="login-form">
 
@@ -152,9 +171,10 @@ const Login = () => {
                 <Link to="/forgot-password" className="forgot-link">{t('forgotPassword')}</Link>
               </div>
 
-              <button type="submit" className="btn-submit">
-                {t('signIn')}
+              <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Signing In...' : t('signIn')}
               </button>
+
             </form>
 
             <div className="divider">
@@ -239,6 +259,18 @@ const Login = () => {
           margin-bottom: 1rem;
           font-weight: 700;
         }
+
+        .visual-logo-link {
+          display: inline-block;
+          margin-bottom: 2rem;
+        }
+        .visual-logo {
+          height: 60px;
+          width: auto;
+          filter: brightness(0) invert(1); /* Make logo white for colored background if needed, or keep original */
+          object-fit: contain;
+        }
+
 
         .subtitle {
           color: rgba(255, 255, 255, 0.9);
@@ -372,8 +404,25 @@ const Login = () => {
         }
         .form-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
         .form-header p { color: var(--text-secondary); }
+        
+        .error-message {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid var(--danger);
+          color: var(--danger);
+          border-radius: var(--radius-md);
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
 
         .login-form {
+
           display: flex;
           flex-direction: column;
           gap: 1.25rem;

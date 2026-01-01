@@ -23,7 +23,7 @@ const Landing = () => {
         shelters: Math.max(50, prev.shelters + (Math.random() > 0.7 ? 1 : -1)),
         response: Math.max(10, Math.min(60, prev.response + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0)))
       }));
-    }, 30000); // 30 seconds
+    }, 5000); // 5 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -31,7 +31,7 @@ const Landing = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAlertIndex((prev) => (prev + 1) % ALERTS.length);
-    }, 30000); // 30 seconds
+    }, 5000); // 5 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -55,17 +55,18 @@ const Landing = () => {
       {/* Live Alerts Ticker */}
       <div className="alert-ticker">
         <div className="container flex items-center gap-4">
-          <span className="ticker-label">{t('liveAlerts')}:</span>
+          <span className="ticker-label">{t('liveAlerts')} ({stats.incidents}):</span>
           <div className="ticker-content">
             {currentAlert && (
-              <span key={currentAlert.id} className="ticker-item animate-slide-up-fade">
+              <span key={`${currentAlert.id}-${currentAlertIndex}`} className="ticker-item animate-slide-up-fade">
                 <FaExclamationTriangle className="inline mr-1 text-warning" />
-                <strong>{currentAlert.title}</strong> in {currentAlert.location} ({currentAlert.time})
+                <strong>{t(currentAlert.titleKey)}</strong> in {t(currentAlert.locationKey)} ({t(currentAlert.timeKey)})
               </span>
             )}
           </div>
         </div>
       </div>
+
 
       {/* Stats Grid */}
       <section className="section bg-surface-2">

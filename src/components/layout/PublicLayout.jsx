@@ -14,10 +14,10 @@ const PublicLayout = () => {
     <div className="public-layout">
       <header className="public-navbar glass">
         <div className="container h-full flex items-center justify-between">
-          <Link to="/" className="navbar-logo">
-            <FaExclamationCircle />
-            <span>DMS Public</span>
+          <Link to="/app/dashboard" className="navbar-logo">
+            <img src="/logo.png" alt="DMS Logo" className="logo-img" />
           </Link>
+
 
           <nav className="hidden-sm navbar-nav">
             <LanguageSelector />
@@ -81,12 +81,15 @@ const PublicLayout = () => {
         .navbar-logo {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          color: var(--primary);
-          font-weight: 800;
-          font-size: 1.25rem;
-          text-decoration: none;
+          height: 100%;
         }
+        
+        .logo-img {
+          height: 40px;
+          width: auto;
+          object-fit: contain;
+        }
+
 
         .navbar-nav {
           display: flex;

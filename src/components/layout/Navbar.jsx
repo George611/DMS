@@ -36,7 +36,11 @@ const Navbar = ({ toggleSidebar, isSidebarOpen }) => {
           >
             <FaBars />
           </button>
+          <Link to="/app/dashboard" className="nav-logo-link">
+            <img src="/logo.png" alt="Logo" className="nav-logo-img" />
+          </Link>
           <h1 className="page-title truncate">{t('dashboard')}</h1>
+
         </div>
 
         <div className="navbar-actions">
@@ -135,11 +139,23 @@ const Navbar = ({ toggleSidebar, isSidebarOpen }) => {
           cursor: pointer;
         }
 
+        .nav-logo-link {
+          display: flex;
+          align-items: center;
+          height: 32px;
+        }
+        .nav-logo-img {
+          height: 100%;
+          width: auto;
+          object-fit: contain;
+        }
         .page-title {
           font-size: 1.25rem;
           font-weight: 600;
           max-width: 120px;
+          margin-left: 0.5rem;
         }
+
         @media (min-width: 768px) {
           .page-title { max-width: none; }
         }

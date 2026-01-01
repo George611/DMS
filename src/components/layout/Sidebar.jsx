@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
+
 import { useAuth } from '../../context/AuthContext';
 import {
   FaHome, FaTachometerAlt, FaExclamationTriangle, FaBullhorn,
@@ -40,13 +41,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <aside className={`sidebar ${isOpen ? 'open' : 'collapsed'}`}>
         <div className="sidebar-header">
           <h2 className="logo flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <FaUserShield className="text-xl" />
-              DMS<span className="text-secondary font-normal">{t('core')}</span>
-            </div>
+            <Link to="/app/dashboard" className="logo-container">
+              <img src="/logo.png" alt="DMS Logo" className="sidebar-logo-img" />
+            </Link>
             <button className="sidebar-close" onClick={() => setIsOpen(false)}>
               <FaTimes />
             </button>
+
           </h2>
         </div>
 
@@ -186,12 +187,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           padding: 1.5rem;
           border-bottom: 1px solid var(--border);
         }
-        .logo {
-          color: var(--primary);
-          font-weight: 800;
-          font-size: 1.5rem;
-          letter-spacing: -0.02em;
+        .logo-container {
+          display: flex;
+          align-items: center;
+          height: 48px;
+          margin-bottom: 0.5rem;
         }
+        .sidebar-logo-img {
+          height: 100%;
+          width: auto;
+          object-fit: contain;
+        }
+
         .user-role-banner {
           padding: 0.75rem 1.5rem;
           background: var(--bg-surface-2);
