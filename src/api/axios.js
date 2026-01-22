@@ -19,4 +19,20 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// Add a response interceptor to handle errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Token is invalid or expired
+            localStorage.removeItem('dms_token');
+            localStorage.removeItem('dms_user');
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;

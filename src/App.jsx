@@ -19,6 +19,7 @@ import TwoFactorAuth from './pages/auth/TwoFactorAuth';
 import MockOAuth from './pages/auth/MockOAuth';
 import UserProfile from './pages/user/UserProfile';
 import Audits from './pages/audits/Audits';
+import InventoryManagement from './pages/ops/InventoryManagement';
 import ProtectedRoute from './guards/AuthGuard'; // Using the new guard
 import { FaExclamationCircle } from 'react-icons/fa';
 
@@ -64,6 +65,7 @@ function App() {
                                             <Route path="command" element={<Command />} />
                                             <Route path="logistics" element={<Resources />} />
                                             <Route path="audits" element={<Audits />} />
+                                            <Route path="inventory" element={<InventoryManagement />} />
                                             <Route path="sos" element={<SOS />} />
                                             <Route path="profile" element={<UserProfile />} />
 

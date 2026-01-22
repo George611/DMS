@@ -2,6 +2,8 @@ import express from 'express';
 import {
     getAllResources,
     createResource,
+    updateResource,
+    deleteResource,
     assignResource,
     getIncidentResources
 } from '../controllers/resource.controller.js';
@@ -20,6 +22,8 @@ router.get('/incident/:incident_id', getIncidentResources);
 
 // 3. Create/Manage Resources (Authority only)
 router.post('/', checkRole(['authority']), createResource);
+router.put('/:id', checkRole(['authority']), updateResource);
+router.delete('/:id', checkRole(['authority']), deleteResource);
 
 // 4. Assign Resources to Incidents (Authority & Volunteers)
 router.post('/assign', checkRole(['authority', 'volunteer']), assignResource);

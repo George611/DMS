@@ -73,5 +73,10 @@ export const Resource = {
             WHERE ra.incident_id = ?
         `, [incidentId]);
         return rows;
+    },
+
+    async delete(id) {
+        await pool.query('DELETE FROM resources WHERE id = ?', [id]);
+        return true;
     }
 };

@@ -38,6 +38,33 @@ export const reportIncident = async (req, res) => {
     }
 };
 
+export const updateIncident = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const incident = await Incident.findById(id);
+        if (!incident) return res.status(404).json({ message: 'Incident not found' });
+
+        if (req.user.role !== 'authority' && incident.reporter_id !== req.user.id) {
+            return res.status(403).json({ message: 'Unauthorized to update this incident' });
+        }
+
+        const updated = await Incident.update(id, req.body);
+
+        await Audit.log({
+            user_id: req.user.id,
+            action: 'UPDATE_INCIDENT',
+            entity_type: 'incident',
+            entity_id: id,
+            details: req.body,
+            ip_address: req.ip
+        });
+
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating incident' });
+    }
+};
+
 export const updateIncidentStatus = async (req, res) => {
     try {
         const { id } = req.params;

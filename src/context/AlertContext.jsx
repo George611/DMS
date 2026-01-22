@@ -81,6 +81,16 @@ export const AlertProvider = ({ children }) => {
         setTimeout(fetchIncidents, 1000);
     };
 
+    const updateAlert = async (id, updatedData) => {
+        try {
+            await api.put(`/incidents/${id}`, updatedData);
+            await fetchIncidents();
+        } catch (error) {
+            console.error("Failed to update incident", error);
+            throw error;
+        }
+    };
+
     const toggleAlertStatus = async (id) => {
         const alert = alerts.find(a => a.id === id);
         if (!alert) return;
@@ -104,7 +114,7 @@ export const AlertProvider = ({ children }) => {
     };
 
     return (
-        <AlertContext.Provider value={{ alerts, loading, addAlert, toggleAlertStatus, deleteAlert, fetchIncidents }}>
+        <AlertContext.Provider value={{ alerts, loading, addAlert, updateAlert, toggleAlertStatus, deleteAlert, fetchIncidents }}>
             {children}
         </AlertContext.Provider>
     );

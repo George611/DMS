@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   FaHome, FaTachometerAlt, FaExclamationTriangle, FaBullhorn,
-  FaSitemap, FaTruck, FaClipboardCheck, FaUserShield, FaHandsHelping, FaHospital, FaTimes
+  FaSitemap, FaTruck, FaClipboardCheck, FaUserShield, FaHandsHelping, FaHospital, FaTimes, FaBoxOpen
 } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 import { useLanguage } from '../../context/LanguageContext';
@@ -21,6 +21,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: t('alerts'), path: '/app/alerts', icon: <FaBullhorn /> },
     { name: t('command'), path: '/app/command', icon: <FaUserShield /> },
     { name: t('logistics'), path: '/app/logistics', icon: <FaTruck /> },
+    { name: 'Inventory', path: '/app/inventory', icon: <FaBoxOpen /> },
     { name: t('audits'), path: '/app/audits', icon: <FaClipboardCheck /> },
   ];
 

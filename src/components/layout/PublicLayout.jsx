@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { FaSun, FaMoon, FaExclamationCircle, FaBars, FaTimes } from 'react-icons/fa';
 import LanguageSelector from '../common/LanguageSelector';
 import { useLanguage } from '../../context/LanguageContext';
+import ChatWidget from '../common/ChatWidget';
 
 const PublicLayout = () => {
   const { theme, toggleTheme } = useTheme();
@@ -56,6 +57,7 @@ const PublicLayout = () => {
       <main>
         <Outlet />
       </main>
+      <ChatWidget />
 
       <footer className="public-footer">
         <div className="container">

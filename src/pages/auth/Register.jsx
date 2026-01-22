@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGoogle, FaGithub, FaUserPlus } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
@@ -38,6 +38,7 @@ const Register = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
 
   const handleSubmit = async (e) => {
@@ -76,7 +77,7 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: 'citizen'
+        role: location.state?.role || 'citizen'
       });
       navigate('/app/dashboard');
     } catch (err) {

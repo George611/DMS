@@ -61,3 +61,42 @@ export const getIncidentResources = async (req, res) => {
         res.status(500).json({ message: 'Error fetching assignments' });
     }
 };
+
+export const updateResource = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const resource = await Resource.update(id, req.body);
+
+        await Audit.log({
+            user_id: req.user.id,
+            action: 'UPDATE_RESOURCE',
+            entity_type: 'resource',
+            entity_id: id,
+            details: req.body,
+            ip_address: req.ip
+        });
+
+        res.json(resource);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating resource' });
+    }
+};
+
+export const deleteResource = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Resource.delete(id);
+
+        await Audit.log({
+            user_id: req.user.id,
+            action: 'DELETE_RESOURCE',
+            entity_type: 'resource',
+            entity_id: id,
+            ip_address: req.ip
+        });
+
+        res.json({ message: 'Resource deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting resource' });
+    }
+};

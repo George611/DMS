@@ -1,14 +1,34 @@
 import DisasterMap from '../../components/maps/DisasterMap';
 import { useAlerts } from '../../context/AlertContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { FaMapMarkedAlt, FaList } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import { FaMapMarkedAlt, FaList, FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
 import { useState } from 'react';
 import Loader from '../../components/Loader';
+import IncidentEditModal from '../../components/disasters/IncidentEditModal';
 
 const DisasterList = () => {
     const [view, setView] = useState('map');
-    const { alerts, loading } = useAlerts();
+    const { alerts, loading, deleteAlert, updateAlert, toggleAlertStatus } = useAlerts();
     const { t } = useLanguage();
+    const { user } = useAuth();
+
+    const [editingIncident, setEditingIncident] = useState(null);
+
+    const isAuthority = user?.role === 'authority';
+
+    const handleEdit = (incident) => {
+        setEditingIncident(incident);
+    };
+
+    const handleSaveEdit = async (formData) => {
+        try {
+            await updateAlert(editingIncident.id, formData);
+            setEditingIncident(null);
+        } catch (error) {
+            alert("Failed to update incident");
+        }
+    };
 
     if (loading && alerts.length === 0) return <Loader />;
 
@@ -48,6 +68,7 @@ const DisasterList = () => {
                                         <th>{t('location')}</th>
                                         <th>{t('status')}</th>
                                         <th>{t('time')}</th>
+                                        {isAuthority && <th>{t('actions')}</th>}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -66,6 +87,35 @@ const DisasterList = () => {
                                                 </span>
                                             </td>
                                             <td className="text-muted">{new Date(alert.createdAt || alert.created_at).toLocaleTimeString()}</td>
+                                            {isAuthority && (
+                                                <td>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            className="action-btn edit"
+                                                            title="Edit"
+                                                            onClick={() => handleEdit(alert)}
+                                                        >
+                                                            <FaEdit />
+                                                        </button>
+                                                        <button
+                                                            className="action-btn resolve"
+                                                            title="Toggle Status"
+                                                            onClick={() => toggleAlertStatus(alert.id)}
+                                                        >
+                                                            <FaCheck />
+                                                        </button>
+                                                        <button
+                                                            className="action-btn delete"
+                                                            title="Delete"
+                                                            onClick={() => {
+                                                                if (window.confirm('Are you sure?')) deleteAlert(alert.id)
+                                                            }}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -74,6 +124,13 @@ const DisasterList = () => {
                     </div>
                 )}
             </div>
+
+            <IncidentEditModal
+                isOpen={!!editingIncident}
+                onClose={() => setEditingIncident(null)}
+                onSave={handleSaveEdit}
+                incident={editingIncident}
+            />
 
             <style>{`
         .glass-pill {
@@ -156,6 +213,24 @@ const DisasterList = () => {
         }
         .status-tag.active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
         .status-tag.inactive { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3); }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .action-btn.edit:hover { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .action-btn.resolve:hover { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
         [dir="rtl"] .premium-table { text-align: right; }
       `}</style>

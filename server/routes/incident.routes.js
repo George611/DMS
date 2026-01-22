@@ -2,6 +2,7 @@ import express from 'express';
 import {
     getIncidents,
     reportIncident,
+    updateIncident,
     updateIncidentStatus,
     deleteIncident
 } from '../controllers/incident.controller.js';
@@ -19,7 +20,10 @@ router.get('/', getIncidents);
 // 2. Report Incidents (Authority & Citizen)
 router.post('/', checkRole(['authority', 'citizen']), reportIncident);
 
-// 3. Update Status (Authority & Assigned Volunteers)
+// 3. Update Incident (Authority & Reporter)
+router.put('/:id', updateIncident);
+
+// 4. Update Status (Authority & Assigned Volunteers)
 router.patch('/:id/status', checkRole(['authority', 'volunteer']), updateIncidentStatus);
 
 // 4. Manage Incidents (Authority only)

@@ -37,6 +37,15 @@ export const Incident = {
         return true;
     },
 
+    async update(id, data) {
+        const { title, description, type, severity, location } = data;
+        await pool.query(
+            'UPDATE incidents SET title = ?, description = ?, type = ?, severity = ?, location = ? WHERE id = ?',
+            [title, description, type, severity, location, id]
+        );
+        return { id, ...data };
+    },
+
     async delete(id) {
         await pool.query('DELETE FROM incidents WHERE id = ?', [id]);
         return true;
