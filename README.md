@@ -1,44 +1,47 @@
-# Disaster Management System (DMS)
+Disaster Management System (DMS)
 
-A real-time coordination and response platform for national disaster management.
+A real-time platform for national disaster management, designed to coordinate alerts, volunteers, and resources efficiently.
 
-## Features
-- **Live Alerts**: Real-time situational awareness with dynamic tickers.
-- **Multilingual Support**: English, Spanish, French, and Arabic (RTL support).
-- **Role-based Access**: Custom dashboards for Authorities, Volunteers, and Citizens.
-- **Resource Management**: Track and allocate assets, beds, and personnel.
-- **Audit Logs**: Comprehensive tracking of system activities.
+Features
 
----
+Live Alerts: Real-time situational updates with dynamic tickers.
 
-## 🚀 Frontend Setup (React + Vite)
+Multilingual Support: English, Spanish, French, and Arabic (with RTL support).
 
-### 1. Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
+Role-Based Access: Customized dashboards for Authorities, Volunteers, and Citizens.
 
-### 2. Installation
-```bash
+Resource Management: Track and allocate assets, beds, and personnel.
+
+Audit Logs: Comprehensive logs for system activities and actions.
+
+Frontend Setup (React + Vite)
+Prerequisites
+
+Node.js v18 or higher
+
+npm or yarn
+
+Installation
 git clone https://github.com/George611/DMS.git
 cd DMS
 npm install
-```
 
-### 3. Running Locally
-```bash
+Running Locally
 npm run dev
-```
-The app will be available at `http://localhost:5173`.
 
----
 
-## 🛠️ Backend Setup (Node.js + MySQL) - *In Progress*
+The app will be available at http://localhost:5173
+.
 
-### 1. Database Configuration
-1. Install MySQL Server.
-2. Create a database named `dms_db`.
-3. Create the `users` table:
-```sql
+Backend Setup (Node.js + MySQL)
+1. Database Configuration
+
+Install MySQL Server.
+
+Create a database named dms_db.
+
+Create the users table:
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -47,45 +50,58 @@ CREATE TABLE users (
     role ENUM('authority', 'volunteer', 'citizen') DEFAULT 'citizen',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### 2. Environment Variables
-Create a `.env` file in the `server/` directory:
-```env
+2. Environment Variables
+
+Create a .env file in the server/ directory:
+
 DB_HOST=localhost
 DB_USER=your_username
 DB_PASS=your_password
 DB_NAME=dms_db
 PORT=5000
-```
 
-### 3. Running the Server
-```bash
+3. Running the Server
 cd server
 npm install
 node index.js
-```
 
----
 
-## 📂 Project Structure
-- `src/components`: Reusable UI components.
-- `src/context`: React Context providers (Auth, Theme, Language, Alert, Audit).
-- `src/pages`: Page-level components (Public, Auth, Dashboard, etc.).
-- `src/services`: API client and data services.
-- `src/utils`: Mock data and helper functions.
-- `server/`: Node.js Express backend (API).
+The backend will run at http://localhost:5000
+.
 
----
+Project Structure
+src/
+├─ components/     # Reusable UI components
+├─ context/        # React Context Providers (Auth, Theme, Language, Alert, Audit)
+├─ pages/          # Page-level components (Public, Auth, Dashboard, etc.)
+├─ services/       # API client & data services
+├─ utils/          # Mock data & helper functions
+server/            # Node.js Express backend (API)
 
-## 🤝 Contributing
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+Contributing
 
----
+We welcome contributions!
 
-## 📄 License
+Fork the repository.
+
+Create a feature branch:
+
+git checkout -b feature/YourFeatureName
+
+
+Commit your changes:
+
+git commit -m "Add some feature"
+
+
+Push to your branch:
+
+git push origin feature/YourFeatureName
+
+
+Open a Pull Request.
+
+License
+
 © 2025 Disaster Management System
