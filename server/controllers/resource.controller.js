@@ -1,5 +1,6 @@
 import { Resource } from '../models/resource.model.js';
 import { Audit } from '../models/audit.model.js';
+import { emitResourceUpdate, emitResourceDelete } from '../services/socket.service.js';
 
 export const getAllResources = async (req, res) => {
     try {
@@ -13,6 +14,9 @@ export const getAllResources = async (req, res) => {
 export const createResource = async (req, res) => {
     try {
         const resource = await Resource.create(req.body);
+
+        // Real-time update
+        emitResourceUpdate(resource);
 
         await Audit.log({
             user_id: req.user.id,
@@ -37,6 +41,10 @@ export const assignResource = async (req, res) => {
         }
 
         await Resource.assignToIncident({ incident_id, resource_id, quantity });
+
+        // Update resource stock level live
+        const updatedResource = await Resource.findById(resource_id);
+        emitResourceUpdate(updatedResource);
 
         await Audit.log({
             user_id: req.user.id,
@@ -67,6 +75,9 @@ export const updateResource = async (req, res) => {
         const { id } = req.params;
         const resource = await Resource.update(id, req.body);
 
+        // Real-time update
+        emitResourceUpdate(resource);
+
         await Audit.log({
             user_id: req.user.id,
             action: 'UPDATE_RESOURCE',
@@ -86,6 +97,9 @@ export const deleteResource = async (req, res) => {
     try {
         const { id } = req.params;
         await Resource.delete(id);
+
+        // Real-time delete
+        emitResourceDelete(id);
 
         await Audit.log({
             user_id: req.user.id,

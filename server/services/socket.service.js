@@ -50,3 +50,36 @@ export const emitStatusUpdate = (incidentId, status) => {
         io.emit('status_updated', { id: incidentId, status });
     }
 };
+
+export const emitIncidentUpdate = (incident) => {
+    if (io) {
+        io.emit('incident_updated', incident);
+    }
+};
+
+export const emitIncidentDelete = (id) => {
+    if (io) {
+        io.emit('incident_deleted', { id });
+    }
+};
+
+export const emitResourceUpdate = (resource) => {
+    if (io) {
+        io.emit('resource_updated', resource);
+        // Alert authorities about inventory changes
+        io.to('authority').emit('admin_notification', {
+            message: `Inventory Update: ${resource.name} has been updated.`,
+            type: 'inventory'
+        });
+    }
+};
+
+export const emitResourceDelete = (id) => {
+    if (io) {
+        io.emit('resource_deleted', { id });
+        io.to('authority').emit('admin_notification', {
+            message: `Inventory Alert: A resource has been decommissioned.`,
+            type: 'inventory'
+        });
+    }
+};

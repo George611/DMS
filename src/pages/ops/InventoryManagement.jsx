@@ -3,9 +3,11 @@ import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaBoxOpen } from 'react-icons
 import api from '../../api';
 import Loader from '../../components/Loader';
 import { useLanguage } from '../../context/LanguageContext';
+import { useSocket } from '../../context/SocketContext';
 
 const InventoryManagement = () => {
     const { t } = useLanguage();
+    const { socket } = useSocket();
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +36,32 @@ const InventoryManagement = () => {
     useEffect(() => {
         fetchResources();
     }, []);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleResourceUpdate = (resource) => {
+            setResources(prev => {
+                const exists = prev.find(r => r.id === resource.id);
+                if (exists) {
+                    return prev.map(r => r.id === resource.id ? resource : r);
+                }
+                return [resource, ...prev];
+            });
+        };
+
+        const handleResourceDelete = ({ id }) => {
+            setResources(prev => prev.filter(r => r.id !== parseInt(id)));
+        };
+
+        socket.on('resource_updated', handleResourceUpdate);
+        socket.on('resource_deleted', handleResourceDelete);
+
+        return () => {
+            socket.off('resource_updated', handleResourceUpdate);
+            socket.off('resource_deleted', handleResourceDelete);
+        };
+    }, [socket]);
 
     const handleOpenModal = (resource = null) => {
         if (resource) {

@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
+// Middleware & Stress Guard
+import { generalStressGuard, authStressGuard, aiStressGuard } from './middleware/stressGuard.js';
+
 const app = express();
 const httpServer = createServer(app);
 const io = initSocket(httpServer);
@@ -28,7 +31,12 @@ app.use(cors());
 app.use(express.json());
 
 // Main Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authStressGuard, authRoutes); // Protect login/register
+app.use('/api/chat/gemini', aiStressGuard); // Protect AI API
+
+// Apply general stress protection to all other API calls
+app.use('/api', generalStressGuard);
+
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/resources', resourceRoutes);

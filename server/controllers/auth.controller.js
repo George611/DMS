@@ -39,7 +39,7 @@ export const register = async (req, res) => {
 
         await connection.commit();
 
-        const token = jwt.sign({ id: userId, role: role || 'citizen' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: userId, role: role || 'citizen' }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
         res.status(201).json({
             token,
@@ -83,7 +83,7 @@ export const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '15m' }
         );
 
         res.status(200).json({

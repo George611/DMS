@@ -66,12 +66,34 @@ export const AlertProvider = ({ children }) => {
             ));
         };
 
+        const handleIncidentUpdate = (incident) => {
+            setAlerts(prev => prev.map(alert =>
+                alert.id === incident.id ? {
+                    ...alert,
+                    title: incident.title,
+                    location: incident.location,
+                    type: incident.type,
+                    severity: incident.severity,
+                    status: incident.status,
+                    isActive: incident.status !== 'resolved'
+                } : alert
+            ));
+        };
+
+        const handleIncidentDelete = ({ id }) => {
+            setAlerts(prev => prev.filter(alert => alert.id !== parseInt(id)));
+        };
+
         socket.on('new_incident', handleNewIncident);
         socket.on('status_updated', handleStatusUpdate);
+        socket.on('incident_updated', handleIncidentUpdate);
+        socket.on('incident_deleted', handleIncidentDelete);
 
         return () => {
             socket.off('new_incident', handleNewIncident);
             socket.off('status_updated', handleStatusUpdate);
+            socket.off('incident_updated', handleIncidentUpdate);
+            socket.off('incident_deleted', handleIncidentDelete);
         };
     }, [socket]);
 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGoogle, FaGithub, FaUserPlus } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGoogle, FaGithub, FaUserPlus, FaUserShield, FaHandsHelping } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
+import api from '../../api';
 
 const Register = () => {
   const { t, language } = useLanguage();
@@ -26,19 +27,21 @@ const Register = () => {
 
   const currentTestimonial = localizedTestimonials[testiIndex] || { initials: "?", name: "User", role: "Member", quote: "..." };
 
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: location.state?.role || 'citizen',
     terms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
 
   const handleSubmit = async (e) => {
@@ -73,15 +76,25 @@ const Register = () => {
 
     setIsSubmitting(true);
     try {
-      await register({
+      // We manually hit the API here instead of using auth.register 
+      // because auth.register automatically logs the user in.
+      await api.post('/auth/register', {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: location.state?.role || 'citizen'
+        role: formData.role
       });
-      navigate('/app/dashboard');
+
+      // Redirect to login with a success indicator
+      navigate('/login', {
+        state: {
+          message: "Registration successful! please sign in with your credentials.",
+          email: formData.email // Pre-fill email for convenience
+        }
+      });
     } catch (err) {
-      setError(err || "An error occurred during registration");
+      console.error('Registration failed:', err);
+      setError(err.response?.data?.message || "An error occurred during registration");
     } finally {
       setIsSubmitting(false);
     }
@@ -189,6 +202,36 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 />
+              </div>
+
+              <div className="role-selector-mini">
+                <p className="label">{t('selectAccess')}</p>
+                <div className="role-options">
+                  <button
+                    type="button"
+                    className={`role-opt ${formData.role === 'citizen' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, role: 'citizen' })}
+                  >
+                    <FaUser />
+                    <span>{t('citizen')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`role-opt ${formData.role === 'volunteer' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, role: 'volunteer' })}
+                  >
+                    <FaHandsHelping />
+                    <span>{t('volunteer')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`role-opt ${formData.role === 'authority' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, role: 'authority' })}
+                  >
+                    <FaUserShield />
+                    <span>{t('authority')}</span>
+                  </button>
+                </div>
               </div>
 
               <div className="terms-checkbox">
@@ -515,6 +558,50 @@ const Register = () => {
         }
         .link-bold { color: var(--primary); font-weight: 700; text-decoration: none; }
         .link-bold:hover { text-decoration: underline; }
+
+        .role-selector-mini {
+          margin-bottom: 0.5rem;
+        }
+        .role-selector-mini .label {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .role-options {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.5rem;
+        }
+        .role-opt {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.6rem;
+          border: 1px solid var(--border);
+          border-radius: var(--radius-md);
+          background: var(--bg-surface-2);
+          color: var(--text-muted);
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 0.7rem;
+          font-weight: 600;
+        }
+        .role-opt svg {
+          font-size: 1.1rem;
+        }
+        .role-opt:hover {
+          border-color: var(--primary);
+          color: var(--text-main);
+        }
+        .role-opt.active {
+          background: var(--primary);
+          color: white;
+          border-color: var(--primary);
+        }
       `}</style>
     </div>
   );

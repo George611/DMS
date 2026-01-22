@@ -16,8 +16,8 @@ const AuthGuard = ({ children, allowedRoles }) => {
     }
 
     if (allowedRoles && !allowedRoles.includes(user.role)) {
-        // If user is logged in but doesn't have required role
-        return <Navigate to="/unauthorized" replace />;
+        // If user is logged in but doesn't have required role, push back to login
+        return <Navigate to="/login" replace />;
     }
 
     return children ? children : <Outlet />;

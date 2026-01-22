@@ -6,17 +6,17 @@ import { useLanguage } from '../../context/LanguageContext';
 
 const Login = () => {
   const { t } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
   const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const successMessage = location.state?.message;
+  const [email, setEmail] = useState(location.state?.email || '');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   // Role state, initialized from location state or default
   const [role, setRole] = useState(location.state?.role || 'citizen');
@@ -133,6 +133,7 @@ const Login = () => {
             <div className="form-header">
               <h2>{t('signIn')}</h2>
               <p>{t('enterDetails')}</p>
+              {successMessage && <div className="success-message animate-fade-in">{successMessage}</div>}
               {error && <div className="error-message animate-fade-in">{error}</div>}
             </div>
 
@@ -423,6 +424,17 @@ const Login = () => {
           background: rgba(239, 68, 68, 0.1);
           border: 1px solid var(--danger);
           color: var(--danger);
+          border-radius: var(--radius-md);
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+
+        .success-message {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid var(--success);
+          color: var(--success);
           border-radius: var(--radius-md);
           font-size: 0.875rem;
           font-weight: 500;

@@ -27,7 +27,8 @@ const Dashboard = () => {
                 setStats(response.data);
             } catch (err) {
                 console.error('Failed to fetch dashboard stats:', err);
-                setError('Could not load operational data.');
+                const backendMessage = err.response?.data?.message;
+                setError(backendMessage || 'Could not load operational data.');
             } finally {
                 setLoading(false);
             }

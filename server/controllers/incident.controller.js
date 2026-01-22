@@ -1,6 +1,6 @@
 import { Incident } from '../models/incident.model.js';
 import { Audit } from '../models/audit.model.js';
-import { emitIncident, emitStatusUpdate } from '../services/socket.service.js';
+import { emitIncident, emitStatusUpdate, emitIncidentUpdate, emitIncidentDelete } from '../services/socket.service.js';
 
 export const getIncidents = async (req, res) => {
     try {
@@ -49,6 +49,9 @@ export const updateIncident = async (req, res) => {
         }
 
         const updated = await Incident.update(id, req.body);
+
+        // Real-time update
+        emitIncidentUpdate(updated);
 
         await Audit.log({
             user_id: req.user.id,
@@ -103,6 +106,9 @@ export const deleteIncident = async (req, res) => {
     try {
         const incident = await Incident.findById(req.params.id);
         await Incident.delete(req.params.id);
+
+        // Real-time deletion
+        emitIncidentDelete(req.params.id);
 
         await Audit.log({
             user_id: req.user.id,
