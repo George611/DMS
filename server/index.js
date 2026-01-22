@@ -1,75 +1,98 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Routes
+import authRoutes from './routes/auth.routes.js';
+import volunteerRoutes from './routes/volunteer.routes.js';
 import pool from './config/db.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Auth Routes
-app.post('/api/auth/register', async (req, res) => {
+// Main Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/volunteers', volunteerRoutes);
+
+// Keep Stats & AI for now (or move to routes later)
+app.get('/api/stats/dashboard', async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const [totals] = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status != 'resolved' THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved
+            FROM incidents
+        `);
 
-        // Check if user exists
-        const [existing] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (existing.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
+        const [trends] = await pool.query(`
+            SELECT 
+                DATE(created_at) as date,
+                SUM(CASE WHEN status != 'resolved' THEN 1 ELSE 0 END) as new,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved
+            FROM incidents
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+        `);
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const [distribution] = await pool.query(`
+            SELECT status, COUNT(*) as count
+            FROM incidents
+            GROUP BY status
+        `);
 
-        // Insert user
-        const [result] = await pool.query(
-            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            [name, email, hashedPassword, role || 'citizen']
-        );
-
-        const token = jwt.sign({ id: result.insertId, role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-
-        res.status(201).json({
-            token,
-            user: { id: result.insertId, name, email, role: role || 'citizen' }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during registration' });
-    }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (users.length === 0) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        const user = users[0];
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        const [recent] = await pool.query(`
+            SELECT id, severity, type, location, created_at, status
+            FROM incidents
+            ORDER BY created_at DESC
+            LIMIT 5
+        `);
 
         res.json({
-            token,
-            user: { id: user.id, name: user.name, email: user.email, role: user.role }
+            summary: {
+                active: totals[0].active || 0,
+                resolved: totals[0].resolved || 0,
+                total: totals[0].total || 0,
+                personnel: 156,
+                hospitals: 12,
+                responseTime: '14m'
+            },
+            trends: trends,
+            distribution: distribution,
+            recent: recent
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during login' });
+        res.status(500).json({ message: 'Error fetching stats' });
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+import { GoogleGenerativeAI } from '@google/generative-ai';
+app.post('/api/chat/gemini', async (req, res) => {
+    try {
+        const { message } = req.body;
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) return res.json({ text: "[MOCK AI] API Key missing." });
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent(`System: DMS Assistant for Lebanon. User: ${message}`);
+        const response = await result.response;
+        res.json({ text: response.text() });
+    } catch (error) {
+        res.status(500).json({ message: 'AI Error' });
+    }
+});
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

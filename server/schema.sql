@@ -45,3 +45,15 @@ INSERT IGNORE INTO roles (name, description) VALUES
 ('authority', 'System administrators and command center personnel'),
 ('volunteer', 'Field responders and resource managers'),
 ('citizen', 'Individual reporters and alert viewers');
+
+
+-- Category 5: Volunteer Management
+CREATE TABLE IF NOT EXISTS volunteers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    specialization VARCHAR(255),
+    status ENUM('active', 'inactive', 'on-mission') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

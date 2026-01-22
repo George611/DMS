@@ -53,7 +53,7 @@ const Login = () => {
     try {
       await login(email, password);
       // Login context already handles user state, navigate to dashboard
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err) {
       setError(err || "Invalid email or password");
     } finally {

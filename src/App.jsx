@@ -19,6 +19,7 @@ import TwoFactorAuth from './pages/auth/TwoFactorAuth';
 import MockOAuth from './pages/auth/MockOAuth';
 import UserProfile from './pages/user/UserProfile';
 import Audits from './pages/audits/Audits';
+import ProtectedRoute from './guards/AuthGuard'; // Using the new guard
 import { FaExclamationCircle } from 'react-icons/fa';
 
 // Placeholder Pages (We will build these out next)
@@ -52,19 +53,21 @@ function App() {
                                 </Route>
 
                                 {/* Protected Authority Routes */}
-                                <Route path="/app" element={<MainLayout />}>
-                                    <Route path="dashboard" element={<Dashboard />} />
-                                    <Route path="disasters" element={<DisasterList />} />
-                                    <Route path="report" element={<ReportIncident />} />
-                                    <Route path="alerts" element={<AlertsPage />} />
-                                    <Route path="command" element={<Command />} />
-                                    <Route path="logistics" element={<Resources />} />
-                                    <Route path="audits" element={<Audits />} />
-                                    <Route path="sos" element={<SOS />} />
-                                    <Route path="profile" element={<UserProfile />} />
+                                <Route element={<ProtectedRoute />}>
+                                    <Route path="/app" element={<MainLayout />}>
+                                        <Route path="dashboard" element={<Dashboard />} />
+                                        <Route path="disasters" element={<DisasterList />} />
+                                        <Route path="report" element={<ReportIncident />} />
+                                        <Route path="alerts" element={<AlertsPage />} />
+                                        <Route path="command" element={<Command />} />
+                                        <Route path="logistics" element={<Resources />} />
+                                        <Route path="audits" element={<Audits />} />
+                                        <Route path="sos" element={<SOS />} />
+                                        <Route path="profile" element={<UserProfile />} />
 
-                                    {/* Fallback */}
-                                    <Route path="*" element={<div className="p-4">Page Not Found</div>} />
+                                        {/* Fallback */}
+                                        <Route path="*" element={<div className="p-4">Page Not Found</div>} />
+                                    </Route>
                                 </Route>
                             </Routes>
                         </ThemeProvider>

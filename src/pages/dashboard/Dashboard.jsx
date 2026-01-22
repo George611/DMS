@@ -6,25 +6,52 @@ import StatsCard from '../../components/common/StatsCard';
 import { FaExclamationTriangle, FaUsers, FaHospital, FaClock } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 
+import { useState, useEffect } from 'react';
+import api from '../../api';
+import Loader from '../../components/Loader';
+
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
 const Dashboard = () => {
     const { t } = useLanguage();
-    // Mock Data for Charts
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await api.get('/stats/dashboard');
+                setStats(response.data);
+            } catch (err) {
+                console.error('Failed to fetch dashboard stats:', err);
+                setError('Could not load operational data.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    if (loading) return <Loader />;
+    if (error) return <div className="p-8 text-center text-danger">{error}</div>;
+
+    // Map API trends to Chart format
     const incidentData = {
-        labels: [t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat'), t('sun')],
+        labels: stats?.trends.map(t => new Date(t.date).toLocaleDateString([], { weekday: 'short' })) || [],
         datasets: [
             {
                 label: t('newIncidents'),
-                data: [12, 19, 3, 5, 2, 3, 7],
+                data: stats?.trends.map(t => t.new) || [],
                 borderColor: 'rgb(239, 68, 68)',
                 backgroundColor: 'rgba(239, 68, 68, 0.5)',
                 tension: 0.4,
             },
             {
                 label: t('resolved'),
-                data: [10, 15, 8, 12, 5, 8, 10],
+                data: stats?.trends.map(t => t.resolved) || [],
                 borderColor: 'rgb(16, 185, 129)',
                 backgroundColor: 'rgba(16, 185, 129, 0.5)',
                 tension: 0.4,
@@ -32,16 +59,20 @@ const Dashboard = () => {
         ],
     };
 
+    // Map API distribution to Doughnut format
     const resourceData = {
-        labels: [t('available'), t('deployed'), t('maintenance')],
+        labels: stats?.distribution.map(d => t(d.status) || d.status) || [],
         datasets: [
             {
-                data: [65, 25, 10],
-                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+                data: stats?.distribution.map(d => d.count) || [],
+                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
                 borderWidth: 0,
             },
         ],
     };
+
+    const summary = stats?.summary || {};
+    const recentAlerts = stats?.recent || [];
 
     return (
         <div className="dashboard animate-fade-in">
@@ -51,10 +82,10 @@ const Dashboard = () => {
             </div>
 
             <div className="stats-grid mb-8">
-                <StatsCard title={t('activeIncidents')} value="24" icon={<FaExclamationTriangle />} color="danger" trend={`+12% ${t('vsLastWeek')}`} />
-                <StatsCard title={t('personnelDeployed')} value="156" icon={<FaUsers />} color="info" />
-                <StatsCard title={t('hospitalsActive')} value="12" icon={<FaHospital />} color="success" />
-                <StatsCard title={t('avgResponseTime')} value={`14${t('mins')}`} icon={<FaClock />} color="warning" trend={`-2${t('mins')} ${t('improvement')}`} />
+                <StatsCard title={t('activeIncidents')} value={summary.active} icon={<FaExclamationTriangle />} color="danger" trend={`+12% ${t('vsLastWeek')}`} />
+                <StatsCard title={t('personnelDeployed')} value={summary.personnel} icon={<FaUsers />} color="info" />
+                <StatsCard title={t('hospitalsActive')} value={summary.hospitals} icon={<FaHospital />} color="success" />
+                <StatsCard title={t('avgResponseTime')} value={summary.responseTime} icon={<FaClock />} color="warning" trend={`-2${t('mins')} ${t('improvement')}`} />
             </div>
 
             <div className="charts-grid mb-8">
@@ -78,7 +109,7 @@ const Dashboard = () => {
                     <table className="w-full text-left mt-4">
                         <thead>
                             <tr className="border-b border-border">
-                                <th className="p-3">{t('severity')}</th>
+                                <th className="p-3">Severity</th>
                                 <th className="p-3">{t('type')}</th>
                                 <th className="p-3">{t('location')}</th>
                                 <th className="p-3">{t('time')}</th>
@@ -86,20 +117,19 @@ const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr className="border-b border-border">
-                                <td className="p-3"><span className="badge badge-danger">{t('critical')}</span></td>
-                                <td className="p-3">{t('flashFlood')}</td>
-                                <td className="p-3">{t('northZone')}</td>
-                                <td className="p-3">12 {t('minsAgo')}</td>
-                                <td className="p-3 text-warning">{t('responding')}</td>
-                            </tr>
-                            <tr>
-                                <td className="p-3"><span className="badge badge-warning">{t('high')}</span></td>
-                                <td className="p-3">{t('powerOutage')}</td>
-                                <td className="p-3">{t('hospitalLocation')}</td>
-                                <td className="p-3">45 {t('minsAgo')}</td>
-                                <td className="p-3 text-success">{t('resolved')}</td>
-                            </tr>
+                            {recentAlerts.map(alert => (
+                                <tr key={alert.id} className="border-b border-border">
+                                    <td className="p-3">
+                                        <span className={`badge badge-${alert.severity === 'critical' ? 'danger' : 'warning'}`}>
+                                            {alert.severity.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td className="p-3">{alert.type}</td>
+                                    <td className="p-3">{alert.location}</td>
+                                    <td className="p-3">{new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                    <td className="p-3 text-warning">{t(alert.status)}</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

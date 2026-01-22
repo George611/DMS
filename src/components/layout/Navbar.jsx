@@ -30,7 +30,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen }) => {
       <div className="navbar-content">
         <div className="flex items-center gap-4">
           <button
-            className={`hamburger-btn ${isSidebarOpen ? 'lg:hidden' : ''} transition-all duration-300 hover:text-primary`}
+            className={`hamburger-btn ${isSidebarOpen && user ? 'lg:hidden' : ''} transition-all duration-300 hover:text-primary`}
             onClick={toggleSidebar}
             aria-label={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
           >

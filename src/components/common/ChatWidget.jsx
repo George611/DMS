@@ -1,67 +1,125 @@
-import { useState } from 'react';
-import { FaComments, FaPaperPlane, FaTimes } from 'react-icons/fa';
+import { useState, useRef, useEffect } from 'react';
+import { FaComments, FaPaperPlane, FaTimes, FaRobot } from 'react-icons/fa';
+import api from '../../api';
 
 const ChatWidget = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { id: 1, sender: 'System', text: 'Welcome to the DMS Command Channel.', time: '10:00' },
-        { id: 2, sender: 'Alex (Auth)', text: 'Update on District A?', time: '10:05' },
-        { id: 3, sender: 'Sarah (Vol)', text: 'Team dispatched. ETA 5 mins.', time: '10:06' },
-    ]);
-    const [newMessage, setNewMessage] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState([
+    { id: 1, sender: 'System', text: 'Welcome to the DMS Command Channel. I am your AI Assistant.', time: '10:00' },
+  ]);
+  const [newMessage, setNewMessage] = useState('');
+  const chatBodyRef = useRef(null);
 
-    const sendMessage = (e) => {
-        e.preventDefault();
-        if (!newMessage.trim()) return;
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
 
-        setMessages([...messages, {
-            id: Date.now(),
-            sender: 'Me',
-            text: newMessage,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
-        setNewMessage('');
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || isTyping) return;
+
+    const userMessage = {
+      id: Date.now(),
+      sender: 'Me',
+      text: newMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    return (
-        <div className={`chat-widget ${isOpen ? 'open' : ''}`}>
-            {!isOpen && (
-                <button className="chat-toggle" onClick={() => setIsOpen(true)}>
-                    <FaComments />
-                    <span className="badge">1</span>
-                </button>
-            )}
+    setMessages(prev => [...prev, userMessage]);
+    setNewMessage('');
+    setIsTyping(true);
 
-            {isOpen && (
-                <div className="chat-window card glass">
-                    <div className="chat-header">
-                        <h3>Command Channel</h3>
-                        <button onClick={() => setIsOpen(false)}><FaTimes /></button>
-                    </div>
+    try {
+      // Prepare history for Gemini (transforming to {role, parts})
+      const history = messages
+        .filter(m => m.sender !== 'System')
+        .map(m => ({
+          role: m.sender === 'Me' ? 'user' : 'model',
+          parts: [{ text: m.text }]
+        }));
 
-                    <div className="chat-body">
-                        {messages.map(msg => (
-                            <div key={msg.id} className={`message ${msg.sender === 'Me' ? 'sent' : 'received'}`}>
-                                <div className="sender">{msg.sender}</div>
-                                <div className="text">{msg.text}</div>
-                                <div className="time">{msg.time}</div>
-                            </div>
-                        ))}
-                    </div>
+      const response = await api.post('/chat/gemini', {
+        message: userMessage.text,
+        history
+      });
 
-                    <form onSubmit={sendMessage} className="chat-input hover:bg-surface-2 transition-colors">
-                        <input
-                            type="text"
-                            placeholder="Type a message..."
-                            value={newMessage}
-                            onChange={e => setNewMessage(e.target.value)}
-                        />
-                        <button type="submit" className="text-primary"><FaPaperPlane /></button>
-                    </form>
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'Gemini AI',
+        text: response.data.text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } catch (error) {
+      console.error('Chat Error:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'System',
+        text: 'Sorry, I am having trouble connecting right now. Please try again later.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+
+  return (
+    <div className={`chat-widget ${isOpen ? 'open' : ''}`}>
+      {!isOpen && (
+        <button className="chat-toggle" onClick={() => setIsOpen(true)}>
+          <FaComments />
+          <span className="badge">1</span>
+        </button>
+      )}
+
+      {isOpen && (
+        <div className="chat-window card glass">
+          <div className="chat-header">
+            <div className="flex items-center gap-2">
+              <FaRobot className="text-xl" />
+              <span>DMS AI Assistant</span>
+            </div>
+            <button onClick={() => setIsOpen(false)}><FaTimes /></button>
+          </div>
+
+
+          <div className="chat-body" ref={chatBodyRef}>
+            {messages.map(msg => (
+              <div key={msg.id} className={`message ${msg.sender === 'Me' ? 'sent' :
+                msg.sender === 'System' ? 'system' : 'ai'}`}>
+                <div className="sender">{msg.sender}</div>
+                <div className="text">{msg.text}</div>
+                <div className="time">{msg.time}</div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="message ai typing">
+                <div className="sender">Gemini AI</div>
+                <div className="typing-dots">
+                  <span></span><span></span><span></span>
                 </div>
+              </div>
             )}
+          </div>
 
-            <style>{`
+
+          <form onSubmit={sendMessage} className="chat-input hover:bg-surface-2 transition-colors">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+            />
+            <button type="submit" className="text-primary"><FaPaperPlane /></button>
+          </form>
+        </div>
+      )}
+
+      <style>{`
         .chat-widget {
           position: fixed;
           bottom: 2rem;
@@ -125,15 +183,27 @@ const ChatWidget = () => {
           border-radius: var(--radius-md);
           font-size: 0.9rem;
         }
-        .received {
+        .received, .ai {
           align-self: flex-start;
           background: var(--bg-surface-2);
           border-bottom-left-radius: 2px;
         }
+        .ai {
+          border-left: 3px solid var(--primary);
+        }
+        .system {
+          align-self: center;
+          background: rgba(var(--primary-hue), 0.1);
+          color: var(--primary);
+          font-weight: 500;
+          text-align: center;
+          width: 90%;
+          font-size: 0.8rem;
+        }
         .sent {
           align-self: flex-end;
-          background: var(--primary-light);
-          color: black; 
+          background: var(--primary);
+          color: white; 
           border-bottom-right-radius: 2px;
         }
         .sender {
@@ -149,7 +219,30 @@ const ChatWidget = () => {
           margin-top: 2px;
         }
         
+        .typing {
+           padding: 0.5rem 1rem;
+        }
+        .typing-dots {
+          display: flex;
+          gap: 4px;
+        }
+        .typing-dots span {
+          width: 6px;
+          height: 6px;
+          background: var(--primary);
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1.0); }
+        }
+
         .chat-input {
+
           padding: 0.75rem;
           border-top: 1px solid var(--border);
           display: flex;
@@ -163,8 +256,8 @@ const ChatWidget = () => {
           color: var(--text-main);
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default ChatWidget;
