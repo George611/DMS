@@ -20,8 +20,11 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// Middleware & Stress Guard
+// Middleware & Stress Guard & Inspectors
 import { generalStressGuard, authStressGuard, aiStressGuard } from './middleware/stressGuard.js';
+import { inspectSecurity } from './inspectors/security.inspector.js';
+import { inspectSystemHealth } from './inspectors/system.inspector.js';
+import { inspectIncident } from './inspectors/incident.inspector.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +32,10 @@ const io = initSocket(httpServer);
 
 app.use(cors());
 app.use(express.json());
+
+// GLOBAL INSPECTORS (Layer 1: Defense)
+app.use(inspectSecurity);      // Check for attacks
+app.use(inspectSystemHealth);  // Check if server is dying
 
 // Main Routes
 app.use('/api/auth', authStressGuard, authRoutes); // Protect login/register
@@ -38,7 +45,19 @@ app.use('/api/chat/gemini', aiStressGuard); // Protect AI API
 app.use('/api', generalStressGuard);
 
 app.use('/api/volunteers', volunteerRoutes);
+
+// Apply Incident Inspector specifically to incident creation
+// Apply Incident Inspector specifically to incident creation
+// We intercept the router to apply it before the controller
+app.post('/api/incidents', verifyToken, inspectIncident, (req, res, next) => {
+    // Forward to the actual router's handler logic 
+    // (Note: In a cleaner architecture, this should be inside incident.routes.js, 
+    // but we can attach it here as a global override or just let the router handle it if passed correctly)
+    next();
+}, incidentRoutes);
+// For all other incident routes
 app.use('/api/incidents', incidentRoutes);
+
 app.use('/api/resources', resourceRoutes);
 app.use('/api/audit', auditRoutes);
 
