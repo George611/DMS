@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Breadcrumbs from '../common/Breadcrumbs';
 import ChatWidget from '../common/ChatWidget';
+import LiveAlerts from '../alerts/LiveAlerts';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,6 +33,7 @@ const MainLayout = () => {
           <Outlet />
         </main>
         <ChatWidget />
+        <LiveAlerts />
         <footer className="footer flex justify-between items-center text-xs">
           <p>{t('copyright')}</p>
           <div className="footer-links">

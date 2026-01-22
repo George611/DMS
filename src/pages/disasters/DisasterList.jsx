@@ -3,11 +3,14 @@ import { useAlerts } from '../../context/AlertContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { FaMapMarkedAlt, FaList } from 'react-icons/fa';
 import { useState } from 'react';
+import Loader from '../../components/Loader';
 
 const DisasterList = () => {
     const [view, setView] = useState('map');
-    const { alerts } = useAlerts();
+    const { alerts, loading } = useAlerts();
     const { t } = useLanguage();
+
+    if (loading && alerts.length === 0) return <Loader />;
 
     return (
         <div className="page-container animate-fade-in p-6">
@@ -53,16 +56,16 @@ const DisasterList = () => {
                                             <td className="font-bold">
                                                 <div className="flex items-center gap-3">
                                                     <span className={`type-dot ${alert.type}`}></span>
-                                                    {alert.customTitle || t(alert.titleKey)}
+                                                    {alert.title}
                                                 </div>
                                             </td>
-                                            <td className="text-muted">{alert.customLocation || t(alert.locationKey)}</td>
+                                            <td className="text-muted">{alert.location}</td>
                                             <td>
                                                 <span className={`status-tag ${alert.isActive ? 'active' : 'inactive'}`}>
-                                                    {alert.isActive ? t('active') : t('inactive')}
+                                                    {t(alert.status)}
                                                 </span>
                                             </td>
-                                            <td className="text-muted">{t(alert.timeKey)}</td>
+                                            <td className="text-muted">{new Date(alert.createdAt || alert.created_at).toLocaleTimeString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -138,9 +141,10 @@ const DisasterList = () => {
             height: 8px;
             border-radius: 50%;
         }
-        .type-dot.critical { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
-        .type-dot.warning { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
-        .type-dot.info { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .type-dot.fire { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .type-dot.flood { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .type-dot.medical { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+        .type-dot.earthquake { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
         .status-tag {
             padding: 0.35rem 0.75rem;

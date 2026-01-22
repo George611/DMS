@@ -100,3 +100,16 @@ CREATE TABLE IF NOT EXISTS resource_assignments (
     FOREIGN KEY (incident_id) REFERENCES incidents(id) ON DELETE CASCADE,
     FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
 );
+
+-- Category 8: Audit & Activity Tracking
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INT,
+    details JSON,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);

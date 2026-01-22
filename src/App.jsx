@@ -29,50 +29,53 @@ const Command = () => <div className="p-4"><h2>Command Center</h2><p>Operational
 
 import { AlertProvider } from './context/AlertContext';
 import { AuditProvider } from './context/AuditContext';
+import { SocketProvider } from './context/SocketContext';
 
 function App() {
     return (
         <Router>
             <AuthProvider>
-                <AuditProvider>
-                    <AlertProvider>
-                        <ThemeProvider>
-                            <Routes>
-                                {/* Public/Auth Routes */}
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/register" element={<Register />} />
-                                <Route path="/verify-email" element={<EmailVerification />} />
-                                <Route path="/2fa" element={<TwoFactorAuth />} />
-                                <Route path="/auth/mock/:provider" element={<MockOAuth />} />
-                                <Route path="/forgot-password" element={<ForgotPassword />} />
-                                <Route path="/role-selection" element={<RoleSelection />} />
+                <SocketProvider>
+                    <AuditProvider>
+                        <AlertProvider>
+                            <ThemeProvider>
+                                <Routes>
+                                    {/* Public/Auth Routes */}
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/register" element={<Register />} />
+                                    <Route path="/verify-email" element={<EmailVerification />} />
+                                    <Route path="/2fa" element={<TwoFactorAuth />} />
+                                    <Route path="/auth/mock/:provider" element={<MockOAuth />} />
+                                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                                    <Route path="/role-selection" element={<RoleSelection />} />
 
-                                {/* Public Landing */}
-                                <Route element={<PublicLayout />}>
-                                    <Route path="/" element={<Landing />} />
-                                </Route>
-
-                                {/* Protected Authority Routes */}
-                                <Route element={<ProtectedRoute />}>
-                                    <Route path="/app" element={<MainLayout />}>
-                                        <Route path="dashboard" element={<Dashboard />} />
-                                        <Route path="disasters" element={<DisasterList />} />
-                                        <Route path="report" element={<ReportIncident />} />
-                                        <Route path="alerts" element={<AlertsPage />} />
-                                        <Route path="command" element={<Command />} />
-                                        <Route path="logistics" element={<Resources />} />
-                                        <Route path="audits" element={<Audits />} />
-                                        <Route path="sos" element={<SOS />} />
-                                        <Route path="profile" element={<UserProfile />} />
-
-                                        {/* Fallback */}
-                                        <Route path="*" element={<div className="p-4">Page Not Found</div>} />
+                                    {/* Public Landing */}
+                                    <Route element={<PublicLayout />}>
+                                        <Route path="/" element={<Landing />} />
                                     </Route>
-                                </Route>
-                            </Routes>
-                        </ThemeProvider>
-                    </AlertProvider>
-                </AuditProvider>
+
+                                    {/* Protected Authority Routes */}
+                                    <Route element={<ProtectedRoute />}>
+                                        <Route path="/app" element={<MainLayout />}>
+                                            <Route path="dashboard" element={<Dashboard />} />
+                                            <Route path="disasters" element={<DisasterList />} />
+                                            <Route path="report" element={<ReportIncident />} />
+                                            <Route path="alerts" element={<AlertsPage />} />
+                                            <Route path="command" element={<Command />} />
+                                            <Route path="logistics" element={<Resources />} />
+                                            <Route path="audits" element={<Audits />} />
+                                            <Route path="sos" element={<SOS />} />
+                                            <Route path="profile" element={<UserProfile />} />
+
+                                            {/* Fallback */}
+                                            <Route path="*" element={<div className="p-4">Page Not Found</div>} />
+                                        </Route>
+                                    </Route>
+                                </Routes>
+                            </ThemeProvider>
+                        </AlertProvider>
+                    </AuditProvider>
+                </SocketProvider>
             </AuthProvider>
         </Router>
     );

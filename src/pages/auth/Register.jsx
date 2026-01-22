@@ -44,8 +44,29 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
+    if (!formData.name.trim()) {
+      setError("Full name is required");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+
+    if (!formData.terms) {
+      setError("You must agree to the terms and conditions");
       return;
     }
 
@@ -55,9 +76,9 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: 'citizen' // Default role for new signups
+        role: 'citizen'
       });
-      navigate('/dashboard'); // Direct to dashboard on success
+      navigate('/app/dashboard');
     } catch (err) {
       setError(err || "An error occurred during registration");
     } finally {

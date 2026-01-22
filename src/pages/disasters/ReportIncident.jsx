@@ -1,18 +1,38 @@
 import { useState } from 'react';
-import { FaCamera, FaMapMarkerAlt, FaPaperPlane } from 'react-icons/fa';
+import { FaCamera, FaMapMarkerAlt, FaPaperPlane, FaExclamationTriangle } from 'react-icons/fa';
+import api from '../../api';
+import { useNavigate } from 'react-router-dom';
+import Loader from '../../components/Loader';
 
 const ReportIncident = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [report, setReport] = useState({
-        type: 'flood',
+        title: '',
+        type: 'fire',
         severity: 'high',
         location: '',
         description: '',
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert("Report Submitted for formatting check. In real app, this sends to server.");
+        setLoading(true);
+        try {
+            await api.post('/incidents', {
+                ...report,
+                title: report.title || `${report.type.toUpperCase()} reported at ${report.location}`
+            });
+            navigate('/app/dashboard');
+        } catch (error) {
+            console.error("Failed to submit report", error);
+            alert("Failed to submit report. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (loading) return <Loader />;
 
     return (
         <div className="max-w-2xl mx-auto">
@@ -22,6 +42,18 @@ const ReportIncident = () => {
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="form-group">
+                        <label>Incident Subject</label>
+                        <input
+                            type="text"
+                            className="input"
+                            placeholder="Brief title (e.g. Apartment Fire)"
+                            value={report.title}
+                            onChange={e => setReport({ ...report, title: e.target.value })}
+                            required
+                        />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div className="form-group">
                             <label>Incident Type</label>
@@ -63,6 +95,7 @@ const ReportIncident = () => {
                                 placeholder="Enter address or coordinates"
                                 value={report.location}
                                 onChange={e => setReport({ ...report, location: e.target.value })}
+                                required
                             />
                             <button type="button" className="btn btn-sm btn-outline ml-2">Use GPS</button>
                         </div>
@@ -131,9 +164,5 @@ const ReportIncident = () => {
         </div>
     );
 };
-
-// Start: Fix lint 'FaExclamationTriangle' is not defined.
-import { FaExclamationTriangle } from 'react-icons/fa';
-// End: Fix
 
 export default ReportIncident;

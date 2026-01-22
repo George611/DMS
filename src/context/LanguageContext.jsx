@@ -183,7 +183,18 @@ export const translations = {
         system: "System",
         core: "Core",
         location: "Location",
-        totalLogs: "Total Logs"
+        totalLogs: "Total Logs",
+        liveActivityMonitoring: "Live Activity Monitoring",
+        systemAudits: "System Audits",
+        completeActivityLog: "Complete activity log and security monitoring",
+        totalEvents: "Total Events",
+        allEvents: "All Events",
+        exportLogs: "Export Logs",
+        activityTimeline: "Activity Timeline",
+        liveIncidentFeed: "Live Incident Feed",
+        noIncidentsReported: "No incidents reported yet",
+        justNow: "Just now",
+        ago: "ago"
     },
     es: {
         // Navbar/Common
@@ -365,7 +376,18 @@ export const translations = {
         system: "Sistema",
         core: "Núcleo",
         location: "Ubicación",
-        totalLogs: "Registros Totales"
+        totalLogs: "Registros Totales",
+        liveActivityMonitoring: "Monitoreo de Actividad en Vivo",
+        systemAudits: "Auditorías del Sistema",
+        completeActivityLog: "Registro completo de actividad y monitoreo de seguridad",
+        totalEvents: "Eventos Totales",
+        allEvents: "Todos los Eventos",
+        exportLogs: "Exportar Registros",
+        activityTimeline: "Cronología de Actividad",
+        liveIncidentFeed: "Feed de Incidentes en Vivo",
+        noIncidentsReported: "Aún no se han informado incidentes",
+        justNow: "Recién ahora",
+        ago: "antes"
     },
     fr: {
         // Navbar/Common
@@ -547,7 +569,18 @@ export const translations = {
         system: "Système",
         core: "Cœur",
         location: "Emplacement",
-        totalLogs: "Journaux Totaux"
+        totalLogs: "Journaux Totaux",
+        liveActivityMonitoring: "Surveillance de l'activité en direct",
+        systemAudits: "Audits du système",
+        completeActivityLog: "Journal d'activité complet et surveillance de la sécurité",
+        totalEvents: "Total des événements",
+        allEvents: "Tous les événements",
+        exportLogs: "Exporter les journaux",
+        activityTimeline: "Chronologie de l'activité",
+        liveIncidentFeed: "Fil d'incidents en direct",
+        noIncidentsReported: "Aucun incident signalé pour le moment",
+        justNow: "À l'instant",
+        ago: "il y a"
     },
     ar: {
         // Navbar/Common
@@ -730,7 +763,18 @@ export const translations = {
         system: "النظام",
         core: "الأساسي",
         location: "الموقع",
-        totalLogs: "السجلات الإجمالية"
+        totalLogs: "السجلات الإجمالية",
+        liveActivityMonitoring: "مراقبة النشاط المباشر",
+        systemAudits: "تدقيق النظام",
+        completeActivityLog: "سجل النشاط الكامل ومراقبة الأمن",
+        totalEvents: "إجمالي الأحداث",
+        allEvents: "كل الأحداث",
+        exportLogs: "تصدير السجلات",
+        activityTimeline: "الجدول الزمني للنشاط",
+        liveIncidentFeed: "موجز الحوادث المباشر",
+        noIncidentsReported: "لم يتم الإبلاغ عن حوادث بعد",
+        justNow: "الآن",
+        ago: "منذ"
     }
 };
 

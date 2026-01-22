@@ -50,9 +50,21 @@ const Login = () => {
     setError('');
     setIsSubmitting(true);
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await login(email, password);
-      // Login context already handles user state, navigate to dashboard
       navigate('/app/dashboard');
     } catch (err) {
       setError(err || "Invalid email or password");

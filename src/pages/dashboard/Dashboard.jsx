@@ -9,6 +9,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import Loader from '../../components/Loader';
+import LiveIncidentFeed from '../../components/disasters/LiveIncidentFeed';
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
@@ -103,35 +104,29 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="card">
-                <h3>{t('recentAlerts')}</h3>
-                <div className="table-responsive">
-                    <table className="w-full text-left mt-4">
-                        <thead>
-                            <tr className="border-b border-border">
-                                <th className="p-3">Severity</th>
-                                <th className="p-3">{t('type')}</th>
-                                <th className="p-3">{t('location')}</th>
-                                <th className="p-3">{t('time')}</th>
-                                <th className="p-3">{t('status')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {recentAlerts.map(alert => (
-                                <tr key={alert.id} className="border-b border-border">
-                                    <td className="p-3">
-                                        <span className={`badge badge-${alert.severity === 'critical' ? 'danger' : 'warning'}`}>
-                                            {alert.severity.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="p-3">{alert.type}</td>
-                                    <td className="p-3">{alert.location}</td>
-                                    <td className="p-3">{new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                                    <td className="p-3 text-warning">{t(alert.status)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <LiveIncidentFeed />
+                </div>
+                <div>
+                    <div className="card h-full">
+                        <h3>System Status</h3>
+                        <p className="text-secondary text-sm mb-4">Network connectivity and service health.</p>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
+                                <span className="text-sm">API Gateway</span>
+                                <span className="text-xs text-green-500 font-bold uppercase tracking-widest">Active</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
+                                <span className="text-sm">Real-time Node</span>
+                                <span className="text-xs text-green-500 font-bold uppercase tracking-widest">Connected</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
+                                <span className="text-sm">Database Sync</span>
+                                <span className="text-xs text-green-500 font-bold uppercase tracking-widest">Stable</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -3,12 +3,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createServer } from 'http';
+import { initSocket } from './services/socket.service.js';
 
 // Routes
 import authRoutes from './routes/auth.routes.js';
 import volunteerRoutes from './routes/volunteer.routes.js';
 import incidentRoutes from './routes/incident.routes.js';
 import resourceRoutes from './routes/resource.routes.js';
+import auditRoutes from './routes/audit.routes.js';
 import pool from './config/db.js';
 import { verifyToken } from './middleware/authMiddleware.js';
 
@@ -18,6 +21,9 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const httpServer = createServer(app);
+const io = initSocket(httpServer);
+
 app.use(cors());
 app.use(express.json());
 
@@ -26,6 +32,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Dashboard Stats (Protected)
 app.get('/api/stats/dashboard', verifyToken, async (req, res) => {
@@ -99,6 +106,6 @@ app.post('/api/chat/gemini', verifyToken, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
