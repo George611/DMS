@@ -7,7 +7,10 @@ import { fileURLToPath } from 'url';
 // Routes
 import authRoutes from './routes/auth.routes.js';
 import volunteerRoutes from './routes/volunteer.routes.js';
+import incidentRoutes from './routes/incident.routes.js';
+import resourceRoutes from './routes/resource.routes.js';
 import pool from './config/db.js';
+import { verifyToken } from './middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,9 +24,11 @@ app.use(express.json());
 // Main Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/volunteers', volunteerRoutes);
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/resources', resourceRoutes);
 
-// Keep Stats & AI for now (or move to routes later)
-app.get('/api/stats/dashboard', async (req, res) => {
+// Dashboard Stats (Protected)
+app.get('/api/stats/dashboard', verifyToken, async (req, res) => {
     try {
         const [totals] = await pool.query(`
             SELECT 
@@ -76,7 +81,8 @@ app.get('/api/stats/dashboard', async (req, res) => {
 });
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-app.post('/api/chat/gemini', async (req, res) => {
+// AI Assistant (Protected)
+app.post('/api/chat/gemini', verifyToken, async (req, res) => {
     try {
         const { message } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
